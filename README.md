@@ -100,15 +100,12 @@ Ejecuta en tu terminal:
 ```bash
 git clone <TU_ENLACE_DE_GITHUB_AQUI>
 
-Aquí tienes todo en **un solo bloque listo para copiar y pegar** en tu `README.md` 👇
-
 ````markdown
-## 📂 Navegación al Proyecto
 
 Luego entra a la carpeta:
 
 ```bash
-cd devFlask
+cd Proyecto-1-Fracciones
 ````
 
 ---
