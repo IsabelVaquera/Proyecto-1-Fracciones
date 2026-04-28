@@ -1,19 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Fracciones</title>
+    
+    <style>
+        /* PALETA DE COLORES PASTEL */
+        :root {
+            --bg-pink-light: #f5d7ef;
+            --bg-pink-dark: #f3c2ea;
+            --bg-blue-light: #c4dafa;
+            --bg-blue-medium: #84b6f4;
+            --primary-blue: #4d82bc;
+            
+            --text-main: #32557a;
+            --card-color: #ffffff;
+            --error-color: #d15c7e; 
+            --success-color: #4d82bc;
+            
+            --shadow: 0 15px 35px rgba(77, 130, 188, 0.15);
+            --radius-large: 28px;
+            --radius-medium: 18px;
+            --radius-small: 12px;
+        }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, var(--bg-blue-light) 0%, transparent 40%),
+                        radial-gradient(circle at bottom right, var(--bg-pink-dark) 0%, transparent 40%),
+                        var(--bg-pink-light);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+
+        .page-container { width: min(1100px, 92%); margin: 0 auto; padding: 40px 0; }
+
+        .hero-section {
+            margin-bottom: 28px; padding: 35px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius-large);
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block; margin-bottom: 10px; padding: 6px 16px;
+            border-radius: 999px; background: var(--bg-blue-medium); color: #fff;
+            font-size: 0.85rem; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;
+        }
+
+        .hero-section h1 { color: var(--primary-blue); font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; margin-bottom: 8px;}
+        .hero-section p { color: var(--text-main); font-size: 1.05rem; opacity: 0.85;}
+
+        /* LA CALCULADORA AHORA OCUPA EL 100% ARRIBA */
+        .calculator-card { margin-bottom: 24px; }
+
+        /* DISTRIBUCIÓN DE 2 COLUMNAS PARA LA PARTE INFERIOR */
+        .content-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 24px; 
+            align-items: start; 
+        }
+
+        .card {
+            border: 2px solid #ffffff; 
+            border-radius: var(--radius-large);
+            background: rgba(255, 255, 255, 0.85); 
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            padding: 28px;
+        }
+        
+        .card-header { margin-bottom: 22px; text-align: center;}
+        .card-header h2 { color: var(--primary-blue); font-size: 1.45rem; margin-bottom: 4px;}
+        .card-header p { color: var(--text-main); font-size: 0.95rem; opacity: 0.8;}
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; align-items: center; }
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        .input-group input {
+            width: 100%; padding: 14px 15px; border: 2px solid var(--bg-blue-light);
+            border-radius: var(--radius-small); background: #ffffff;
+            color: var(--primary-blue); font-size: 1.2rem; text-align: center; outline: none; font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .input-group input::placeholder { color: #a4b9ce; font-weight: normal; }
+        .input-group input:focus { border-color: var(--bg-blue-medium); box-shadow: 0 0 0 4px rgba(132, 182, 244, 0.2); }
+
+        .button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 14px; }
+        
+        button {
+            border: none; border-radius: var(--radius-small); padding: 12px 16px;
+            background: var(--primary-blue); color: #ffffff; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; transition: all 0.2s ease; flex: 1; min-width: 60px;
+        }
+        button:hover { background: #3a6899; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(77, 130, 188, 0.3); }
+        button:active { transform: translateY(0); }
+
+        .secondary-buttons button { background: var(--bg-pink-dark); color: var(--text-main); }
+        .secondary-buttons button:hover { background: #e8aee0; box-shadow: 0 8px 15px rgba(243, 194, 234, 0.4); }
+
+        .result-box {
+            margin-top: 20px; padding: 20px; border: 2px solid var(--bg-blue-light);
+            border-radius: var(--radius-medium); background: #ffffff;
+            text-align: center;
+        }
+        .result-box h3 { margin-bottom: 12px; color: var(--text-main); font-size: 1.08rem; opacity: 0.8;}
+        .result-box p { margin-bottom: 8px; color: var(--text-main); font-size: 0.9rem;}
+        .result-box span, #sortResult { color: var(--primary-blue); font-weight: 900; font-size: 1.6rem;}
+        
+        .history-list {
+            height: 380px; overflow-y: auto; padding: 10px;
+            border: 2px solid var(--bg-blue-light); border-radius: var(--radius-medium);
+            background: #ffffff; list-style: none;
+        }
+        .history-list li {
+            margin-bottom: 10px; padding: 14px; border-radius: var(--radius-small);
+            background: var(--bg-blue-light); color: var(--text-main); font-size: 0.95rem; text-align: center; font-weight: 600;
+        }
+        .history-list li:nth-child(even) { background: var(--bg-pink-light); }
+        .history-list li:last-child { margin-bottom: 0; }
+        .empty-history { background: transparent !important; color: var(--text-main); font-style: italic; opacity: 0.6; padding: 30px !important;}
+
+        .error-message { color: var(--error-color) !important; font-weight: 700; text-align: center; margin-bottom: 15px;}
+        .success-message { color: var(--success-color) !important; font-weight: 900; font-size: 2.2rem !important;}
+
+        .history-list::-webkit-scrollbar { width: 8px; }
+        .history-list::-webkit-scrollbar-track { background: #f0f4f8; border-radius: 999px; }
+        .history-list::-webkit-scrollbar-thumb { background: var(--bg-blue-medium); border-radius: 999px; }
+
+        .dynamic-boxes-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px;}
+        .cajita-fraccion { display: flex; flex-direction: column; width: 90px;}
+        .cajita-fraccion input { 
+            width: 100%; padding: 12px; text-align: center; border: 2px solid var(--bg-blue-light); 
+            background: #ffffff; outline: none; font-size: 1.2rem; font-weight: bold; color: var(--primary-blue);
+        }
+        .cajita-fraccion input:first-child { border-bottom: none; border-radius: var(--radius-small) var(--radius-small) 0 0; }
+        .cajita-fraccion input:last-child { border-radius: 0 0 var(--radius-small) var(--radius-small); }
+        .cajita-fraccion input:focus { border-color: var(--bg-blue-medium); z-index: 2; position: relative;}
+
+        @media (max-width: 920px) { .content-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) {
+            .page-container { width: 94%; padding: 20px 0; }
+            .hero-section { padding: 25px; border-radius: 22px; }
+            .hero-section h1 { font-size: 2rem; }
+            .card { padding: 22px; border-radius: 22px; }
+            .form-grid { grid-template-columns: 1fr; gap: 0; }
+            .button-group { flex-direction: column; } button { width: 100%; }
+        }
+    </style>
+</head>
 <body>
-    <div class="App">
-        <header class="App-header">
-            <img src="{{ url_for('static', filename='Octocat.png') }}" class="App-logo" alt="logo" />
-            <p>
-                My GitHub Codespaces <span class="heart">♥️</span> Flask Env
-            </p>
-            <p class="small">
-                Edit <code>templates/index.html</code> and refresh to see your changes!
-            </p>
-        </header>
-    </div>
-</body>
 
+    <div class="page-container">
+        
+        <div class="hero-section">
+            <span class="hero-badge">Proyecto 1</span>
+            <h1>Calculadora De Fracciones</h1>
+            <p>Operaciones, comparación y ordenamiento.</p>
+        </div>
+
+        {% if error %}
+        <div class="result-box" style="margin-bottom: 24px; border-color: var(--error-color);">
+            <p class="error-message">{{ error }}</p>
+        </div>
+        {% endif %}
+
+        <div class="card calculator-card">
+            <div class="card-header">
+                <h2>Operaciones Básicas</h2>
+                <p>Calcula o compara dos fracciones.</p>
+            </div>
+            
+            <form method="POST" action="/">
+                <div class="form-grid">
+                    <div>
+                        <div class="input-group">
+                            <input type="number" name="num1" placeholder="Numerador 1">
+                        </div>
+                        <div class="input-group">
+                            <input type="number" name="den1" placeholder="Denominador 1">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <input type="number" name="num2" placeholder="Numerador 2">
+                        </div>
+                        <div class="input-group">
+                            <input type="number" name="den2" placeholder="Denominador 2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" name="operacion" value="sumar">+</button>
+                    <button type="submit" name="operacion" value="restar">-</button>
+                    <button type="submit" name="operacion" value="multiplicar">x</button>
+                    <button type="submit" name="operacion" value="dividir">÷</button>
+                </div>
+                
+                <div class="button-group secondary-buttons" style="max-width: 400px; margin: 0 auto;">
+                    <button type="submit" name="operacion" value="comparar" style="width: 100%;">Comparar ( < , > , = )</button>
+                </div>
+            </form>
+
+            {% if resultado %}
+            <div class="result-box">
+                <h3>Resultados del Cálculo</h3>
+                <div style="display: flex; justify-content: space-around; margin-top: 15px; align-items: center;">
+                    <div>
+                        <p>Real</p>
+                        <span style="font-size: 1.2rem;">{{ resultado.valor_crudo() }}</span>
+                    </div>
+                    <div style="border-left: 2px solid var(--bg-blue-light); padding-left: 15px;">
+                        <p>Simplificado</p>
+                        <span class="success-message">{{ resultado }}</span>
+                    </div>
+                    <div style="border-left: 2px solid var(--bg-blue-light); padding-left: 15px;">
+                        <p>Decimal</p>
+                        <span style="font-size: 1.2rem;">{{ resultado.valor_decimal() | round(4) }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if comparacion %}
+            <div class="result-box">
+                <h3>Resultado de la Comparación</h3>
+                <span class="success-message" style="font-size: 1.4rem !important;">{{ comparacion }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="content-grid">
+            
+            <div class="card sorter-card">
+                <div class="card-header">
+                    <h2>Ordenador Múltiple</h2>
+                    <p>Agrega fracciones para ordenarlas de menor a mayor.</p>
+                </div>
+                
+                <form method="POST" action="/">
+                    <div id="contenedor-fracciones" class="dynamic-boxes-container">
+                        <div class="cajita-fraccion">
+                            <input type="number" name="nums_orden[]" placeholder="Num" required>
+                            <input type="number" name="dens_orden[]" placeholder="Den" required>
+                        </div>
+                        <div class="cajita-fraccion">
+                            <input type="number" name="nums_orden[]" placeholder="Num" required>
+                            <input type="number" name="dens_orden[]" placeholder="Den" required>
+                        </div>
+                    </div>
+
+                    <div class="button-group secondary-buttons">
+                        <button type="button" onclick="agregarCajita()">+ Añadir</button>
+                        <button type="submit" name="ordenar" value="true" style="background: var(--primary-blue); color: white;">Ordenar Todas</button>
+                    </div>
+                </form>
+
+                {% if lista_ordenada %}
+                <div class="result-box">
+                    <h3>Resultado Ordenado:</h3>
+                    <span class="success-message" style="font-size: 1.4rem !important;">{{ lista_ordenada }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card history-card">
+                <div class="card-header">
+                    <h2>Historial</h2>
+                    <p>Tus cálculos guardados automáticamente.</p>
+                </div>
+                
+                <ul class="history-list">
+                    {% if historial %}
+                        {% for item in historial %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="empty-history">Aún no hay operaciones registradas.</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function agregarCajita() {
+            const contenedor = document.getElementById('contenedor-fracciones');
+            const nuevoDiv = document.createElement('div');
+            nuevoDiv.className = 'cajita-fraccion';
+            nuevoDiv.innerHTML = `
+                <input type="number" name="nums_orden[]" placeholder="Num" required>
+                <input type="number" name="dens_orden[]" placeholder="Den" required>
+            `;
+            contenedor.appendChild(nuevoDiv);
+        }
+        // TRUCO DE UX: Memorizar la posición del scroll al recargar
+        document.addEventListener("DOMContentLoaded", function(event) {
+            var scrollpos = sessionStorage.getItem('scrollpos');
+            if (scrollpos) {
+                window.scrollTo(0, scrollpos);
+                sessionStorage.removeItem('scrollpos'); // Limpiar después de usar
+            }
+        });
+
+        window.onbeforeunload = function(e) {
+            sessionStorage.setItem('scrollpos', window.scrollY);
+        };
+    </script>
+</body>
 </html>

@@ -1,13 +1,23 @@
-# GitHub Codespaces ♥️ Flask
+# 🧮 Calculadora de Fracciones Racionales
 
-Welcome to your shiny new Codespace running Flask! We've got everything fired up and running for you to explore Flask.
+Aplicación web desarrollada en Python con Flask para la gestión, cálculo, comparación y ordenamiento de fracciones matemáticas, implementando el **Algoritmo de Euclides**.
 
-You've got a blank canvas to work on from a git perspective as well. There's a single initial commit with the what you're seeing right now - where you go from here is up to you!
+## 🚀 Características Principales
+* **Aritmética Exacta:** Suma, resta, multiplicación y división de números racionales.
+* **Simplificación Automática:** Reducción de fracciones a su mínima expresión usando Máximo Común Divisor (MCD).
+* **Comparador Lógico:** Evaluación mediante sobrecarga de operadores matemáticos (`<`, `>`, `==`).
+* **Ordenador Dinámico:** Interfaz responsiva que permite añadir múltiples fracciones y ordenarlas con `.sort()`.
+* **Persistencia JSON:** Sistema de almacenamiento local para guardar el historial de operaciones.
 
-Everything you do here is contained within this one codespace. There is no repository on GitHub yet. If and when you’re ready you can click "Publish Branch" and we’ll create your repository and push up your project. If you were just exploring then and have no further need for this code then you can simply delete your codespace and it's gone forever.
+## 🏗️ Arquitectura de Software (MVC)
+El proyecto sigue principios SOLID y el patrón **Modelo-Vista-Controlador**, estructurado en:
+* `/models`: Tipo de Dato Abstracto (ADT) `Fraccion`. Aislado de la web.
+* `/routes`: Blueprints de Flask que actúan como controladores HTTP.
+* `/services`: Lógica de persistencia de datos (`historial_service.py`).
+* `/templates`: UI minimalista estilo "Dashboard" usando CSS puro con paleta de colores pastel.
 
-To run this application:
+## 💻 Instalación y Ejecución Local
 
-```
-flask --debug run
-```
+1. Clonar este repositorio:
+   ```bash
+   git clone <URL_DE_TU_REPOSITORIO>
